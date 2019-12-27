@@ -1,0 +1,6 @@
+model/*
+*.pth
+*.pt
+*.csv
+nohup.out
+*.log
