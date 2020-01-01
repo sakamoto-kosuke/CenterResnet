@@ -247,6 +247,36 @@ def resnet34(pretrained=False, **kwargs):
         _load_pretrained(model, model_zoo.load_url(model_urls['resnet34']))
     return model
 
+def resnet50(pretrained=False, **kwargs):
+    """Constructs a ResNet-34 model.
+    Args:
+        pretrained (bool): If True, returns a model pre-trained on ImageNet
+    """
+    model = ResNetFeatures(Bottleneck, [3, 4, 6, 3], **kwargs)
+    if pretrained:
+        _load_pretrained(model, model_zoo.load_url(model_urls['resnet50']))
+    return model
+
+def resnet101(pretrained=False, **kwargs):
+    """Constructs a ResNet-34 model.
+    Args:
+        pretrained (bool): If True, returns a model pre-trained on ImageNet
+    """
+    model = ResNetFeatures(Bottleneck, [3, 4, 23, 3], **kwargs)
+    if pretrained:
+        _load_pretrained(model, model_zoo.load_url(model_urls['resnet101']))
+    return model
+
+def resnet152(pretrained=False, **kwargs):
+    """Constructs a ResNet-34 model.
+    Args:
+        pretrained (bool): If True, returns a model pre-trained on ImageNet
+    """
+    model = ResNetFeatures(Bottleneck, [3, 8, 36, 3], **kwargs)
+    if pretrained:
+        _load_pretrained(model, model_zoo.load_url(model_urls['resnet152']))
+    return model
+
 
 def _load_pretrained(model, pretrained):
     model_dict = model.state_dict()
@@ -260,12 +290,12 @@ class CentResnet(nn.Module):
     '''Mixture of previous classes'''
     def __init__(self, n_classes):
         super(CentResnet, self).__init__()
-        self.base_model = resnet18(pretrained=False)
+        self.base_model = resnet152(pretrained=False)
         
         # Lateral layers convert resnet outputs to a common feature size
-        self.lat8 = nn.Conv2d(128, 256, 1)
-        self.lat16 = nn.Conv2d(256, 256, 1)
-        self.lat32 = nn.Conv2d(512, 256, 1)
+        self.lat8 = nn.Conv2d(512, 256, 1)
+        self.lat16 = nn.Conv2d(1024, 256, 1)
+        self.lat32 = nn.Conv2d(2048, 256, 1)
         self.bn8 = nn.GroupNorm(16, 256)
         self.bn16 = nn.GroupNorm(16, 256)
         self.bn32 = nn.GroupNorm(16, 256)

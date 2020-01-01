@@ -42,8 +42,8 @@ def criterion(prediction, mask, regr,weight=0.4, size_average=True):
 
 def train(epoch, history=None):
     model.train()
-    t = tqdm(train_loader)
-    for batch_idx, (img_batch, mask_batch, regr_batch) in enumerate(t):
+    iteration = 0
+    for batch_idx, (img_batch, mask_batch, regr_batch) in enumerate(train_loader):
         img_batch = img_batch.to(device)
         mask_batch = mask_batch.to(device)
         regr_batch = regr_batch.to(device)
@@ -55,7 +55,8 @@ def train(epoch, history=None):
         else:
             loss,mask_loss, regr_loss = criterion(output, mask_batch, regr_batch,0.5)  
         
-        t.set_description(f'train_loss (l={loss:.3f})(m={mask_loss:.2f}) (r={regr_loss:.4f}')
+        if iteration % 10 == 0:
+            print('epoch:{} iteration:{} loss:{:.3f} mask_loss:{:.3f} regr_loss:{:.3f}'.format(epoch+1, iteration+1, loss.data, mask_loss.data, regr_loss.data))
         
         if history is not None:
             history.loc[epoch + batch_idx / len(train_loader), 'train_loss'] = loss.data.cpu().numpy()
@@ -64,6 +65,7 @@ def train(epoch, history=None):
         
         optimizer.step()
         exp_lr_scheduler.step()
+        iteration += 1
 
     
     print('Train Epoch: {} \tLR: {:.6f}\tLoss: {:.6f}\tMaskLoss: {:.6f}\tRegLoss: {:.6f}'.format(
@@ -108,7 +110,7 @@ def evaluate(epoch, history=None):
         history.loc[epoch, 'mask_loss'] = valid_mask_loss.cpu().numpy()
         history.loc[epoch, 'regr_loss'] = valid_regr_loss.cpu().numpy()
     
-    torch.save(model.state_dict(), 'model/epoch{}.pth'.format(epoch+1))
+    torch.save(model.state_dict(), 'model/resnet152/epoch{}.pth'.format(epoch+1))
     
     print('Dev loss: {:.4f}'.format(valid_loss))
     
@@ -122,7 +124,7 @@ if __name__ == '__main__':
     
     train_csv = pd.read_csv(os.path.join(PATH, 'train.csv'))
     test_csv = pd.read_csv(os.path.join(PATH, 'sample_submission.csv'))
-
+    
     camera_matrix = np.array([[2304.5479, 0,  1686.2379],
                           [0, 2305.8757, 1354.9849],
                           [0, 0, 1]], dtype=np.float32)
@@ -147,7 +149,7 @@ if __name__ == '__main__':
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(device)
 
-    n_epochs = 10 #6
+    n_epochs = 15 #6
 
     model = model.CentResnet(8).to(device)
     optimizer = optim.AdamW(model.parameters(), lr=0.001)
@@ -160,9 +162,11 @@ if __name__ == '__main__':
     
     for epoch in range(n_epochs):
         print('epoch: {}'.format(epoch+1))
+        '''
         torch.cuda.empty_cache()
         gc.collect()
+        '''
         train(epoch, history)
         evaluate(epoch, history)
         
-    history.to_csv('history.csv')
+    history.to_csv('history_resnet152.csv')

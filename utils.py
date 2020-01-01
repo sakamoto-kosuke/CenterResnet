@@ -26,6 +26,8 @@ camera_matrix = np.array([[2304.5479, 0,  1686.2379],
                           [0, 0, 1]], dtype=np.float32)
 camera_matrix_inv = np.linalg.inv(camera_matrix)
 
+
+
 def str2coords(s, names=['id', 'yaw', 'pitch', 'roll', 'x', 'y', 'z']):
     '''
     Input:
@@ -104,6 +106,15 @@ def visualize(img, coords):
         img = draw_points(img, img_cor_points[-1:])
     
     return img
+
+#---------------------------------------------------------------------------------------
+
+img = imread(PATH + 'image/train/ID_8a6e65317' + '.jpg')
+IMG_SHAPE = img.shape
+IMG_WIDTH = 2048
+IMG_HEIGHT = IMG_WIDTH // 4
+MODEL_SCALE = 8
+DISTANCE_THRESH_CLEAR = 2
 
 def convert_3d_to_2d(x, y, z, fx = 2304.5479, fy = 2305.8757, cx = 1686.2379, cy = 1354.9849):
     # stolen from https://www.kaggle.com/theshockwaverider/eda-visualization-baseline
