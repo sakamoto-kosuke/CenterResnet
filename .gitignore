@@ -4,3 +4,5 @@ model/*
 *.csv
 nohup.out
 *.log
+__pycache__/*
+ipynb_checkpoints/*
